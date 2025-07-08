@@ -54,7 +54,10 @@ ROOT_URLCONF = 'my_site.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR / 'my_site' / 'templates',  # Directory for custom templates
+            BASE_DIR / 'blog' / 'templates',  # Directory for blog templates
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -109,6 +112,8 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
+
+ROOT_URL = '127.0.0.1:8000/'
 
 
 # Static files (CSS, JavaScript, Images)
