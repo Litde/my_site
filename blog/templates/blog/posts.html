@@ -85,7 +85,7 @@
 
         /* Main Content */
         main {
-            padding: 4rem 0;
+            padding: 6rem 0 4rem 0;
         }
 
         /* Search and Filter Section */
@@ -167,6 +167,7 @@
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             transition: transform 0.3s, box-shadow 0.3s;
+            margin-top: 1rem;
         }
 
         .post-card:hover {
@@ -464,7 +465,7 @@
     <main class="container">
        
 
-        <!-- Featured Post -->
+        {% comment %} <!-- Featured Post -->
         <article class="featured-post">
             <div class="featured-image">
                 <div class="featured-badge">Featured</div>
@@ -485,7 +486,7 @@
                 </div>
                 <a href="{% url 'blog:post' post_id=1 %}" class="read-more">Read Full Article</a>
             </div>
-        </article>
+        </article> {% endcomment %}
 
         <!-- Posts Grid -->
         <div class="posts-grid">
@@ -495,7 +496,20 @@
                     <h3 class="post-title">
                         <a href="{% url 'blog:post' post_id=post.id %}">{{ post.title }}</a>
                     </h3>
-                    <p class="post-excerpt">{{ post.content|truncatewords:30 }}</p>
+                    <p class="post-excerpt">{{ post.excerpt|truncatewords:30 }}</p>
+                    <p class="post-meta">
+                        <span class="post-author">By {{ post.author.full_name }}</span>
+                        <span>{{ post.created_at|date:"F j, Y" }}</span>
+                    
+                    <!-- Tags Section -->
+                    {% if post.tags.all %}
+                    <div class="post-tags">
+                        {% for tag in post.tags.all %}
+                            <a href="#" class="post-tag">{{ tag.name }}</a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
                     <a href="{% url 'blog:post' post_id=post.id %}" class="read-more">Read More</a>
                 </div>
             </article>
