@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
 from django.views.generic.base import TemplateView
+from blog.models import BlogPost
 
 def get_navigation_links(active_page, user=None):
     """Generate navigation links with the correct active page"""
@@ -35,9 +36,14 @@ def get_navigation_links(active_page, user=None):
 
 class BlogMainView(View):
     def get(self, request):
+        # Get the latest 3 posts for featured section
+        featured_posts = BlogPost.objects.select_related('author').order_by('-created_at')[:3]
+        
         return render(request, 'my_site/index.html', {
         'url': 'blog',
         'links': get_navigation_links('Home', request.user),
+        'post_count': BlogPost.objects.count(),
+        'featured_posts': featured_posts,
     })
     
 

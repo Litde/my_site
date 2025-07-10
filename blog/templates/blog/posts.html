@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load auth_extras %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -16,9 +17,11 @@
             line-height: 1.6;
             color: #333;
             background-color: #f8f9fa;
-        }
-
-        .container {
+        }                    <p class="post-meta">
+                        <span class="post-author">By {{ post.author.full_name }}</span>
+                        <span>{{ post.created_at|date:"F j, Y" }}</span>
+                        <span style="margin-left: 3px; ">❤️ {{ post.like_count }}</span>
+                    </p>        .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
@@ -156,9 +159,11 @@
         /* Posts Grid */
         .posts-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 2rem;
             margin-bottom: 3rem;
+            margin-left: 20rem;
+            margin-right: 20rem;
         }
 
         .post-card {
@@ -168,6 +173,7 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             transition: transform 0.3s, box-shadow 0.3s;
             margin-top: 1rem;
+            position: relative;
         }
 
         .post-card:hover {
@@ -237,6 +243,20 @@
 
         .post-author {
             font-weight: 500;
+        }
+
+        .like-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 87, 87, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            z-index: 10;
         }
 
         .post-tags {
@@ -403,6 +423,18 @@
         }
 
         /* Responsive Design */
+        @media (max-width: 1200px) {
+            .posts-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .posts-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
         @media (max-width: 768px) {
             .nav-links {
                 display: none;
@@ -467,8 +499,29 @@
         <div class="container">
             <h1>Blog Posts</h1>
             <p>Explore articles on technology, programming, and personal growth</p>
+            <p style="margin-top: 1rem; opacity: 0.8; font-size: 1rem;">
+                📝 Total Posts: <strong>{{ post_count }}</strong>
+            </p>
         </div>
     </section>
+
+    <!-- Admin Quick Actions -->
+    {% if user.is_authenticated and user|in_groups:"Editors,Authors,Moderators" or user.is_staff %}
+    <div style="background: #e9ecef; padding: 15px 0; border-bottom: 1px solid #dee2e6;">
+        <div class="container" style="text-align: center;">
+            <strong style="color: #495057;">Quick Admin Actions:</strong>
+            {% if user.is_staff or user|has_group:"Authors" %}
+                <a href="/blog/add_post" style="margin-left: 15px; color: #007bff; text-decoration: none;">➕ Add New Post</a>
+            {% endif %}
+            {% if user.is_staff or user|has_group:"Editors" %}
+                <a href="/admin/blog/blogpost/" style="margin-left: 15px; color: #28a745; text-decoration: none;">📝 Manage Posts</a>
+            {% endif %}
+            {% if user.is_staff %}
+                <a href="/blog/add_author" style="margin-left: 15px; color: #17a2b8; text-decoration: none;">👤 Add Author</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
 
     <main class="container">
        
@@ -500,14 +553,16 @@
         <div class="posts-grid">
             {% for post in posts %}
             <article class="post-card">
+                <div class="like-badge">❤️ {{ post.like_count }}</div>
                 <div class="post-content">
-                    <h3 class="post-title">
+                    <h3 class="post-title", style="margin-top: 1rem;">
                         <a href="{% url 'blog:post' post_id=post.id %}">{{ post.title }}</a>
                     </h3>
                     <p class="post-excerpt">{{ post.excerpt|truncatewords:30 }}</p>
                     <p class="post-meta">
                         <span class="post-author">By {{ post.author.full_name }}</span>
                         <span>{{ post.created_at|date:"F j, Y" }}</span>
+                    </p>
                     
                     <!-- Tags Section -->
                     {% if post.tags.all %}

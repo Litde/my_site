@@ -1,12 +1,14 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.urls import reverse
 from .models import BlogPost, Author, Tag  
 from .forms import NewPostForm, NewAuthorForm, LoginForm, RegisterForm
 from django.views import View
 from django.views.generic import ListView
+from django.shortcuts import get_object_or_404
 
 
 class BlogMainView(View):
@@ -53,6 +55,9 @@ def about_view(request):
     return render(request, 'blog/about.html', {
         'url': 'blog',
         'links': get_navigation_links('About', request.user),
+        'post_count': BlogPost.objects.count(),
+        'author_count': Author.objects.count(),
+        'tag_count': Tag.objects.count(),
     })
 
 def contact_view(request):
@@ -73,6 +78,7 @@ class BlogPostListView(ListView):
         context = super().get_context_data(**kwargs)
         context['url'] = 'blog'
         context['links'] = get_navigation_links('Posts', self.request.user)
+        context['post_count'] = BlogPost.objects.count()
         return context
     
 
@@ -90,7 +96,10 @@ class BlogPostDetailView(View):
                 'article_date': post.created_at.strftime('%B %d, %Y'),
                 'article_author': post.author.full_name(),
                 'article_image': post.image.url if post.image else None,
-                'post': post,  # Pass the full post object for additional data if needed
+                'post': post,
+                'tags': post.tags.all(),
+                'edit_url': reverse('blog:edit_post', args=[post.id]) if request.user.is_authenticated and request.user.is_staff else None,
+                'delete_url': reverse('blog:delete_post', args=[post.id]) if request.user.is_authenticated and request.user.is_staff else None,
             })
         except BlogPost.DoesNotExist: 
             return BlogPostListView.as_view()(request)
@@ -127,6 +136,41 @@ def add_post_view(request):
         'url': 'blog',
         'links': get_navigation_links('Add Post', request.user),
         'form': form,
+    })
+
+
+def edit_post_view(request, post_id):
+    post = get_object_or_404(BlogPost, id=post_id)
+    form = NewPostForm(instance=post)
+
+    if request.method == 'POST':
+        form = NewPostForm(request.POST, request.FILES, instance=post)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Post "{post.title}" has been updated successfully!')
+            return redirect('blog:post_detail', post_id=post.id)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+
+    return render(request, 'blog/add_post.html', {
+        'url': 'blog',
+        'links': get_navigation_links('Edit Post', request.user),
+        'form': form,
+    })
+
+
+def delete_post_view(request, post_id):
+    post = get_object_or_404(BlogPost, id=post_id)
+
+    if request.method == 'POST':
+        post.delete()
+        messages.success(request, f'Post "{post.title}" has been deleted successfully!')
+        return redirect('blog:posts')
+
+    return render(request, 'blog/delete_post.html', {
+        'url': 'blog',
+        'links': get_navigation_links('Delete Post', request.user),
+        'post': post,
     })
 
 def add_author_view(request):

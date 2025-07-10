@@ -37,6 +37,8 @@ class BlogPost(models.Model):
 
     slug = models.SlugField(max_length=200, unique=True, blank=True, null=True)
 
+    like_count = models.PositiveIntegerField(default=0)
+
     class Meta:
         ordering = ['-created_at']
         verbose_name_plural = "Blog Posts"
