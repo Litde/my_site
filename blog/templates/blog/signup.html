@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - My Blog</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            width: 100%;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 1rem 0;
+            z-index: 1000;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+
+        .nav-links a.active {
+            border-bottom: 2px solid white;
+            padding-bottom: 3px;
+        }
+
+        /* Signup Form */
+        .signup-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            max-width: 500px;
+            margin: 0 auto;
+            margin-top: 100px;
+        }
+
+        .signup-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .signup-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            font-weight: 300;
+        }
+
+        .signup-header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .signup-form {
+            padding: 2.5rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            flex: 1;
+        }
+
+        .form-group.full-width {
+            flex: none;
+            width: 100%;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
+            font-family: inherit;
+        }
+
+        /* Django form field styling */
+        .form-group input[type="text"],
+        .form-group input[type="password"],
+        .form-group input[type="email"] {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group input.error,
+        .form-group textarea.error {
+            border-color: #e74c3c;
+            background-color: #fdf2f2;
+        }
+
+        .form-group input.success {
+            border-color: #27ae60;
+            background-color: #f8fff8;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .success-message {
+            color: #27ae60;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        /* Password Strength Indicator */
+        .password-strength {
+            margin-top: 0.5rem;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .strength-weak {
+            background: #e74c3c;
+            width: 25%;
+        }
+
+        .strength-fair {
+            background: #f39c12;
+            width: 50%;
+        }
+
+        .strength-good {
+            background: #f1c40f;
+            width: 75%;
+        }
+
+        .strength-strong {
+            background: #27ae60;
+            width: 100%;
+        }
+
+        .password-requirements {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .requirement {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .requirement.met {
+            color: #27ae60;
+        }
+
+        .requirement.unmet {
+            color: #e74c3c;
+        }
+
+        /* Terms and Conditions */
+        .terms-agreement {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .terms-agreement input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+            margin-top: 0.2rem;
+        }
+
+        .terms-agreement a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .terms-agreement a:hover {
+            text-decoration: underline;
+        }
+
+        .signup-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .signup-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .signup-btn:active {
+            transform: translateY(0);
+        }
+
+        .signup-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .signup-btn.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .divider {
+            text-align: center;
+            margin: 2rem 0;
+            position: relative;
+            color: #666;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e0e0e0;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 1rem;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #666;
+        }
+
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .login-link a:hover {
+            color: #764ba2;
+        }
+
+        /* Social Signup Buttons */
+        .social-signup {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .social-btn {
+            flex: 1;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            color: #333;
+            text-decoration: none;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .social-btn:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+
+        .social-btn.google {
+            border-color: #db4437;
+            color: #db4437;
+        }
+
+        .social-btn.google:hover {
+            background: #db4437;
+            color: white;
+        }
+
+        .social-btn.github {
+            border-color: #333;
+            color: #333;
+        }
+
+        .social-btn.github:hover {
+            background: #333;
+            color: white;
+        }
+
+        /* Success/Error Messages */
+        .message {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 15px;
+            }
+
+            .signup-container {
+                margin: 80px 15px 20px 15px;
+            }
+
+            .signup-form {
+                padding: 2rem 1.5rem;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .social-signup {
+                flex-direction: column;
+            }
+        }
+
+        /* Animation for form appearance */
+        .signup-container {
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Avatar Preview */
+        .avatar-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem auto;
+            background: #f8f9fa;
+            color: #667eea;
+            font-size: 2rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .avatar-preview.has-image {
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">
+                My Blog
+                {% if user.is_authenticated %}
+                    <span style="font-size: 0.8rem; font-weight: normal; margin-left: 15px; opacity: 0.9;">
+                        Welcome, {{ user.first_name|default:user.username }}!
+                    </span>
+                {% endif %}
+            </div>
+            <ul class="nav-links">
+                {% for link in links %}
+                    <li><a href="{{ link.url }}" {% if link.active %}class="active"{% endif %}>{{ link.name }}</a></li>
+                {% endfor %}
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="signup-container">
+            <div class="signup-header">
+                <h1>Join Our Community</h1>
+                <p>Create your account to start blogging</p>
+            </div>
+
+            <div class="signup-form">
+                <!-- Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="message {% if message.tags == 'success' %}success{% else %}error{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Avatar Preview -->
+                <div class="avatar-preview" id="avatarPreview">
+                    👤
+                </div>
+
+                <!-- Signup Form -->
+                <form id="signupForm" method="post">
+                    {% csrf_token %}
+                    
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            {{ form.first_name.label_tag }}
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                                {% for error in form.first_name.errors %}
+                                    <div class="error-message" style="display: block;">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.last_name.label_tag }}
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                                {% for error in form.last_name.errors %}
+                                    <div class="error-message" style="display: block;">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        {{ form.username.label_tag }}
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            {% for error in form.username.errors %}
+                                <div class="error-message" style="display: block;">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group full-width">
+                        {{ form.email.label_tag }}
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            {% for error in form.email.errors %}
+                                <div class="error-message" style="display: block;">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group full-width">
+                        {{ form.password.label_tag }}
+                        {{ form.password }}
+                        <div class="password-strength" id="passwordStrength">
+                            <div class="password-strength-bar" id="strengthBar"></div>
+                        </div>
+                        <div class="password-requirements" id="passwordRequirements">
+                            <div class="requirement unmet" id="lengthReq">
+                                <span>✗</span> At least 8 characters
+                            </div>
+                            <div class="requirement unmet" id="uppercaseReq">
+                                <span>✗</span> One uppercase letter
+                            </div>
+                            <div class="requirement unmet" id="lowercaseReq">
+                                <span>✗</span> One lowercase letter
+                            </div>
+                            <div class="requirement unmet" id="numberReq">
+                                <span>✗</span> One number
+                            </div>
+                        </div>
+                        {% if form.password.errors %}
+                            {% for error in form.password.errors %}
+                                <div class="error-message" style="display: block;">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group full-width">
+                        {{ form.confirm_password.label_tag }}
+                        {{ form.confirm_password }}
+                        {% if form.confirm_password.errors %}
+                            {% for error in form.confirm_password.errors %}
+                                <div class="error-message" style="display: block;">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    {% if form.non_field_errors %}
+                        {% for error in form.non_field_errors %}
+                            <div class="error-message" style="display: block; margin-bottom: 1rem;">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="terms-agreement">
+                        <input type="checkbox" id="terms" name="terms" required>
+                        <label for="terms">
+                            I agree to the <a href="#" target="_blank">Terms of Service</a> and 
+                            <a href="#" target="_blank">Privacy Policy</a>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="signup-btn" id="signupBtn" disabled>
+                        <span class="spinner" id="spinner"></span>
+                        <span id="btnText">Create Account</span>
+                    </button>
+                </form>
+
+                <div class="login-link">
+                    Already have an account? <a href="{% url 'blog:login' %}">Sign in here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('signupForm');
+            const signupBtn = document.getElementById('signupBtn');
+            const spinner = document.getElementById('spinner');
+            const btnText = document.getElementById('btnText');
+
+            // Form inputs - using Django-generated IDs
+            const firstName = document.getElementById('id_first_name');
+            const lastName = document.getElementById('id_last_name');
+            const username = document.getElementById('id_username');
+            const email = document.getElementById('id_email');
+            const password = document.getElementById('id_password');
+            const confirmPassword = document.getElementById('id_confirm_password');
+            const terms = document.getElementById('terms');
+            const avatarPreview = document.getElementById('avatarPreview');
+
+            // Validation functions
+            function isValidName(name) {
+                return name.trim().length >= 2;
+            }
+
+            function isValidUsername(username) {
+                return username.trim().length >= 3 && /^[a-zA-Z0-9_]+$/.test(username);
+            }
+
+            function isValidEmail(email) {
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            }
+
+            function isValidPassword(password) {
+                return password.length >= 8 &&
+                       /[A-Z]/.test(password) &&
+                       /[a-z]/.test(password) &&
+                       /[0-9]/.test(password);
+            }
+
+            // Simplified validation for client-side feedback only
+            // Django handles the actual validation
+            
+            // Real-time validation state for submit button
+            function checkFormValidity() {
+                const isFirstNameValid = firstName && firstName.value.trim().length >= 2;
+                const isLastNameValid = lastName && lastName.value.trim().length >= 2;
+                const isUsernameValid = username && username.value.trim().length >= 3;
+                const isEmailValid = email && email.value.includes('@');
+                const isPasswordValid = password && isValidPassword(password.value);
+                const isConfirmPasswordValid = confirmPassword && confirmPassword.value === password.value && password.value !== '';
+                const isTermsValid = terms && terms.checked;
+                
+                return isFirstNameValid && isLastNameValid && isUsernameValid && 
+                       isEmailValid && isPasswordValid && isConfirmPasswordValid && isTermsValid;
+            }
+            
+            // Update submit button state
+            function updateSubmitButton() {
+                if (signupBtn) {
+                    signupBtn.disabled = !checkFormValidity();
+                }
+            }
+
+            // Password strength indicator
+            if (password) {
+                password.addEventListener('input', function() {
+                    const pwd = password.value;
+                    const strengthBar = document.getElementById('strengthBar');
+                    const strengthElement = document.getElementById('passwordStrength');
+                    const requirements = document.getElementById('passwordRequirements');
+                    
+                    if (strengthElement && requirements) {
+                        strengthElement.style.display = pwd ? 'block' : 'none';
+                        requirements.style.display = pwd ? 'block' : 'none';
+                    }
+                    
+                    // Check requirements
+                    const lengthReq = document.getElementById('lengthReq');
+                    const uppercaseReq = document.getElementById('uppercaseReq');
+                    const lowercaseReq = document.getElementById('lowercaseReq');
+                    const numberReq = document.getElementById('numberReq');
+
+                    const hasLength = pwd.length >= 8;
+                    const hasUppercase = /[A-Z]/.test(pwd);
+                    const hasLowercase = /[a-z]/.test(pwd);
+                    const hasNumber = /[0-9]/.test(pwd);
+
+                    if (lengthReq) updateRequirement(lengthReq, hasLength);
+                    if (uppercaseReq) updateRequirement(uppercaseReq, hasUppercase);
+                    if (lowercaseReq) updateRequirement(lowercaseReq, hasLowercase);
+                    if (numberReq) updateRequirement(numberReq, hasNumber);
+
+                    // Calculate strength
+                    const metRequirements = [hasLength, hasUppercase, hasLowercase, hasNumber].filter(Boolean).length;
+                    
+                    if (strengthBar) {
+                        strengthBar.className = 'password-strength-bar';
+                        if (metRequirements === 1) strengthBar.classList.add('strength-weak');
+                        else if (metRequirements === 2) strengthBar.classList.add('strength-fair');
+                        else if (metRequirements === 3) strengthBar.classList.add('strength-good');
+                        else if (metRequirements === 4) strengthBar.classList.add('strength-strong');
+                    }
+
+                    updateSubmitButton();
+                });
+            }
+
+            function updateRequirement(element, isMet) {
+                element.className = isMet ? 'requirement met' : 'requirement unmet';
+                element.querySelector('span').textContent = isMet ? '✓' : '✗';
+            }
+
+            // Confirm password validation
+            if (confirmPassword) {
+                confirmPassword.addEventListener('input', function() {
+                    updateSubmitButton();
+                });
+            }
+
+            // Terms checkbox
+            if (terms) {
+                terms.addEventListener('change', function() {
+                    updateSubmitButton();
+                });
+            }
+
+            // Update avatar preview
+            function updateAvatarPreview() {
+                if (firstName && lastName && avatarPreview) {
+                    const firstInitial = firstName.value.charAt(0).toUpperCase();
+                    const lastInitial = lastName.value.charAt(0).toUpperCase();
+                    
+                    if (firstInitial && lastInitial) {
+                        avatarPreview.textContent = firstInitial + lastInitial;
+                        avatarPreview.style.background = '#667eea';
+                        avatarPreview.style.color = 'white';
+                    } else {
+                        avatarPreview.textContent = '👤';
+                        avatarPreview.style.background = '#f8f9fa';
+                        avatarPreview.style.color = '#667eea';
+                    }
+                }
+            }
+
+            // Add event listeners for avatar preview and validation
+            if (firstName) {
+                firstName.addEventListener('input', function() {
+                    updateAvatarPreview();
+                    updateSubmitButton();
+                });
+            }
+            
+            if (lastName) {
+                lastName.addEventListener('input', function() {
+                    updateAvatarPreview();
+                    updateSubmitButton();
+                });
+            }
+            
+            if (username) {
+                username.addEventListener('input', updateSubmitButton);
+            }
+            
+            if (email) {
+                email.addEventListener('input', updateSubmitButton);
+            }
+
+            // Form submission - let Django handle validation
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    // Show loading state
+                    if (signupBtn && spinner && btnText) {
+                        signupBtn.classList.add('loading');
+                        spinner.style.display = 'inline-block';
+                        btnText.textContent = 'Creating Account...';
+                    }
+                    
+                    // Let the form submit naturally to Django
+                });
+            }
+
+            // Handle social signup buttons
+            document.querySelectorAll('.social-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const provider = this.classList.contains('google') ? 'Google' : 'GitHub';
+                    alert(`${provider} authentication would be implemented here`);
+                });
+            });
+
+            // Auto-focus on first name field
+            if (firstName) {
+                firstName.focus();
+            }
+
+            // Initialize submit button state
+            updateSubmitButton();
+        });
+    </script>
+</body>
+</html>

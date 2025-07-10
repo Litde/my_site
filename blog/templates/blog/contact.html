@@ -394,7 +394,14 @@
 <body>
     <header>
         <nav class="container">
-            <div class="logo">My Blog</div>
+            <div class="logo">
+                My Blog
+                {% if user.is_authenticated %}
+                    <span style="font-size: 0.8rem; font-weight: normal; margin-left: 15px; opacity: 0.9;">
+                        Welcome, {{ user.first_name|default:user.username }}!
+                    </span>
+                {% endif %}
+            </div>
             <ul class="nav-links">
                 {% for link in links %}
                     <li><a href="{{ link.url }}" class="{% if link.active %}active{% endif %}">{{ link.name }}</a></li>

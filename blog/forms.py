@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth.models import User
 from blog.models import Author, BlogPost, Tag
 
 class NewPostForm(forms.ModelForm):
@@ -63,3 +64,56 @@ class NewAuthorForm(forms.ModelForm):
     last_name = forms.CharField(max_length=100, required=True, label="Last Name")
     email = forms.EmailField(required=True, label="Email")
     bio = forms.CharField(widget=forms.Textarea, required=False, label="Bio")
+
+
+class RegisterForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, label="Password")
+    confirm_password = forms.CharField(widget=forms.PasswordInput, label="Confirm Password")
+
+    class Meta:
+        model = User  
+        fields = ['username', 'first_name', 'last_name', 'email', 'password', 'confirm_password']
+        widgets = {
+            'username': forms.TextInput(attrs={'placeholder': 'Choose a unique username'}),
+            'first_name': forms.TextInput(attrs={'placeholder': 'Enter your first name'}),
+            'last_name': forms.TextInput(attrs={'placeholder': 'Enter your last name'}),
+            'email': forms.EmailInput(attrs={'placeholder': 'Enter your email address'}),
+            'password': forms.PasswordInput(attrs={'placeholder': 'Enter a secure password'}),
+            'confirm_password': forms.PasswordInput(attrs={'placeholder': 'Confirm your password'}),
+        }
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError('This username is already taken. Please choose a different one.')
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError('An account with this email already exists.')
+        return email
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        confirm_password = cleaned_data.get("confirm_password")
+
+        if password != confirm_password:
+            raise forms.ValidationError("Passwords do not match.")
+        
+        return cleaned_data
+    
+class LoginForm(forms.Form):
+    username = forms.CharField(max_length=150, required=True, label="Username")
+    password = forms.CharField(widget=forms.PasswordInput, required=True, label="Password")
+
+    def clean(self):
+        cleaned_data = super().clean()
+        username = cleaned_data.get("username")
+        password = cleaned_data.get("password")
+
+        if not username or not password:
+            raise forms.ValidationError("Both fields are required.")
+        
+        return cleaned_data
