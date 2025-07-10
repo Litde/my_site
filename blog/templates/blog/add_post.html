@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Post - My Blog</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+
+        .nav-links a.active {
+            border-bottom: 2px solid white;
+            padding-bottom: 3px;
+        }
+
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 4rem 0;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 300;
+        }
+
+        .page-header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* Main Content */
+        main {
+            padding: 6rem 0 4rem 0;
+        }
+
+        /* Form Container */
+        .form-container {
+            max-width: 800px;
+            margin: 1rem auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .form-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .form-header h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-header p {
+            opacity: 0.9;
+        }
+
+        .form-content {
+            padding: 3rem;
+        }
+
+        /* Form Styling */
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        /* Django form field styling */
+        input[type="text"], input[type="email"], textarea, select {
+            box-sizing: border-box;
+        }
+
+        /* Hide Django tags field since we use custom interface */
+        #id_tags {
+            display: none !important;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-group.content-group textarea {
+            min-height: 300px;
+        }
+
+        /* File Upload Styling */
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-upload-label {
+            display: block;
+            padding: 12px 15px;
+            border: 2px dashed #e1e5e9;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+
+        .file-upload-label:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .file-upload-label i {
+            display: block;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #667eea;
+        }
+
+        /* Tags Input */
+        .tags-input {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            min-height: 50px;
+            padding: 8px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            background: white;
+            cursor: text;
+        }
+
+        .tags-input:focus-within {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .tag-item {
+            background: #667eea;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tag-remove {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .tag-remove:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .tag-input {
+            border: none;
+            outline: none;
+            flex: 1;
+            min-width: 120px;
+            padding: 0.5rem;
+            font-size: 1rem;
+        }
+
+        /* Button Styling */
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            min-width: 150px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #667eea;
+            border: 2px solid #e1e5e9;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+
+        /* Form Validation */
+        .error {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .form-group.has-error input,
+        .form-group.has-error textarea,
+        .form-group.has-error select {
+            border-color: #dc3545;
+        }
+
+        /* Success Message */
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            border: 1px solid;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            border: 1px solid #c3e6cb;
+        }
+
+        /* Character Counter */
+        .char-counter {
+            font-size: 0.8rem;
+            color: #6c757d;
+            text-align: right;
+            margin-top: 0.5rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .form-content {
+                padding: 2rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">My Blog</div>
+            <ul class="nav-links">
+                {% for link in links %}
+                    <li><a href="{{ link.url }}" class="{% if link.active %}active{% endif %}">{{ link.name }}</a></li>
+                {% endfor %}
+            </ul>
+        </nav>
+    </header>
+
+    <section class="page-header">
+        <div class="container">
+            <h1>Create New Post</h1>
+            <p>Share your thoughts and ideas with the world</p>
+        </div>
+    </section>
+
+    <main class="container">
+        <div class="form-container">
+            <div class="form-header">
+                <h2>Add New Blog Post</h2>
+                <p>Fill in the details below to create your new post</p>
+            </div>
+            
+            <div class="form-content">
+                <!-- Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                <form method="post" enctype="multipart/form-data" id="addPostForm">
+                    {% csrf_token %}
+                    
+                    <!-- Title Field -->
+                    <div class="form-group{% if form.title.errors %} has-error{% endif %}">
+                        <label for="{{ form.title.id_for_label }}">{{ form.title.label }} *</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <div class="error">{{ form.title.errors.0 }}</div>
+                        {% endif %}
+                        <div class="char-counter">
+                            <span id="title-count">{{ form.title.value|length|default:0 }}</span>/200 characters
+                        </div>
+                    </div>
+
+                    <!-- Excerpt Field -->
+                    <div class="form-group{% if form.excerpt.errors %} has-error{% endif %}">
+                        <label for="{{ form.excerpt.id_for_label }}">{{ form.excerpt.label }}</label>
+                        {{ form.excerpt }}
+                        {% if form.excerpt.errors %}
+                            <div class="error">{{ form.excerpt.errors.0 }}</div>
+                        {% endif %}
+                        <div class="char-counter">
+                            <span id="excerpt-count">{{ form.excerpt.value|length|default:0 }}</span>/500 characters
+                        </div>
+                    </div>
+
+                    <!-- Author Field -->
+                    <div class="form-group{% if form.author.errors %} has-error{% endif %}">
+                        <label for="{{ form.author.id_for_label }}">{{ form.author.label }} *</label>
+                        {{ form.author }}
+                        {% if form.author.errors %}
+                            <div class="error">{{ form.author.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Content Field -->
+                    <div class="form-group content-group{% if form.content.errors %} has-error{% endif %}">
+                        <label for="{{ form.content.id_for_label }}">{{ form.content.label }} *</label>
+                        {{ form.content }}
+                        {% if form.content.errors %}
+                            <div class="error">{{ form.content.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Tags Field -->
+                    <div class="form-group{% if form.tags.errors %} has-error{% endif %}">
+                        <label for="{{ form.tags.id_for_label }}">{{ form.tags.label }}</label>
+                        <div class="tags-input" id="tagsInput">
+                            <input type="text" class="tag-input" placeholder="Type a tag and press Enter">
+                        </div>
+                        {{ form.tags }}
+                        {% if form.tags.errors %}
+                            <div class="error">{{ form.tags.errors.0 }}</div>
+                        {% endif %}
+                        <small style="color: #6c757d; font-size: 0.9rem;">Press Enter after typing each tag</small>
+                    </div>
+
+                    <!-- Image Upload -->
+                    <div class="form-group{% if form.image.errors %} has-error{% endif %}">
+                        <label for="{{ form.image.id_for_label }}">{{ form.image.label }}</label>
+                        <div class="file-upload">
+                            {{ form.image }}
+                            <label for="{{ form.image.id_for_label }}" class="file-upload-label">
+                                <i>📷</i>
+                                <span>Click to upload an image or drag and drop</span>
+                                <small>Supported formats: JPG, PNG, GIF (Max 5MB)</small>
+                            </label>
+                        </div>
+                        {% if form.image.errors %}
+                            <div class="error">{{ form.image.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Slug Field (Optional) -->
+                    {% comment %} <div class="form-group">
+                        <label for="slug">URL Slug</label>
+                        <input type="text" id="slug" name="slug" maxlength="200" placeholder="Auto-generated from title (optional)">
+                        <small style="color: #6c757d; font-size: 0.9rem;">Leave empty to auto-generate from title</small>
+                    </div> {% endcomment %}
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Publish Post</button>
+                        <a href="{% url 'blog:posts' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Set up Django form fields
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hide the Django tags field and show our custom interface
+            const djangoTagsField = document.getElementById('id_tags');
+            if (djangoTagsField) {
+                djangoTagsField.style.display = 'none';
+            }
+            
+            // Set up existing tags if editing
+            const existingTags = djangoTagsField ? djangoTagsField.value : '';
+            if (existingTags) {
+                const tagNames = existingTags.split(',').map(tag => tag.trim()).filter(tag => tag);
+                tags = tagNames;
+                updateTagsDisplay();
+            }
+        });
+
+        // Character counters
+        function updateCharCount(inputId, countId, maxLength) {
+            const input = document.getElementById(inputId);
+            const counter = document.getElementById(countId);
+            
+            if (input && counter) {
+                input.addEventListener('input', function() {
+                    const currentLength = this.value.length;
+                    counter.textContent = currentLength;
+                    
+                    if (currentLength > maxLength * 0.9) {
+                        counter.style.color = '#dc3545';
+                    } else if (currentLength > maxLength * 0.7) {
+                        counter.style.color = '#ffc107';
+                    } else {
+                        counter.style.color = '#6c757d';
+                    }
+                });
+            }
+        }
+
+        updateCharCount('id_title', 'title-count', 200);
+        updateCharCount('id_excerpt', 'excerpt-count', 500);
+
+        // Auto-generate slug from title (not needed since model handles it)
+        // Removed slug generation code
+
+        // Tags functionality
+        const tagsInput = document.getElementById('tagsInput');
+        const tagInput = tagsInput.querySelector('.tag-input');
+        const djangoTagsField = document.getElementById('id_tags');
+        let tags = [];
+
+        function updateTagsDisplay() {
+            const existingTags = tagsInput.querySelectorAll('.tag-item');
+            existingTags.forEach(tag => tag.remove());
+
+            tags.forEach((tag, index) => {
+                const tagElement = document.createElement('div');
+                tagElement.className = 'tag-item';
+                tagElement.innerHTML = `
+                    ${tag}
+                    <button type="button" class="tag-remove" onclick="removeTag(${index})">×</button>
+                `;
+                tagsInput.insertBefore(tagElement, tagInput);
+            });
+
+            // Update the Django form field
+            if (djangoTagsField) {
+                djangoTagsField.value = tags.join(',');
+            }
+        }
+
+        function addTag(tagText) {
+            const trimmedTag = tagText.trim();
+            if (trimmedTag && !tags.includes(trimmedTag)) {
+                tags.push(trimmedTag);
+                updateTagsDisplay();
+            }
+        }
+
+        function removeTag(index) {
+            tags.splice(index, 1);
+            updateTagsDisplay();
+        }
+
+        tagInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addTag(this.value);
+                this.value = '';
+            }
+        });
+
+        // File upload preview
+        const imageField = document.getElementById('id_image');
+        if (imageField) {
+            imageField.addEventListener('change', function() {
+                const file = this.files[0];
+                const label = this.nextElementSibling;
+                
+                if (file) {
+                    const fileName = file.name;
+                    const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                    label.innerHTML = `
+                        <i>✅</i>
+                        <span>${fileName}</span>
+                        <small>Size: ${fileSize} MB</small>
+                    `;
+                }
+            });
+        }
+
+        // Form validation
+        document.getElementById('addPostForm').addEventListener('submit', function(e) {
+            const title = document.getElementById('id_title').value.trim();
+            const content = document.getElementById('id_content').value.trim();
+            const author = document.getElementById('id_author').value;
+
+            if (!title || !content || !author) {
+                e.preventDefault();
+                alert('Please fill in all required fields (Title, Content, and Author).');
+                return false;
+            }
+        });
+
+        // Focus management for tags input
+        tagsInput.addEventListener('click', function() {
+            tagInput.focus();
+        });
+    </script>
+</body>
+</html>
