@@ -1,11 +1,17 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib import messages
-from my_site.views import main_view
 from .models import BlogPost, Author, Tag  
 from.forms import NewPostForm, NewAuthorForm
+from django.views import View
+from django.views.generic import ListView
 
-
+class BlogMainView(View):
+    def get(self, request):
+        return render(request, 'blog/index.html', {
+            'url': 'blog',
+            'links': get_navigation_links('Home'),
+        })
 
 
 def get_navigation_links(active_page):
@@ -28,8 +34,8 @@ def get_navigation_links(active_page):
     
     return links
 
-def blog_main_view(request):
-    return main_view(request)
+# def blog_main_view(request):
+#     return main_view(request)
 
 def about_view(request):
     return render(request, 'blog/about.html', {
@@ -43,44 +49,43 @@ def contact_view(request):
         'links': get_navigation_links('Contact'),
     })
 
+class BlogPostListView(ListView):
+    model = BlogPost
+    template_name = 'blog/posts.html'
+    context_object_name = 'posts'
 
-def posts_main_view(request):
-    posts = BlogPost.objects.all()
-    if not posts:   
-        return render(request, 'blog/posts.html', {
-            'url': 'blog',
-            'links': get_navigation_links('Posts'),
-            'posts': [],  # Pass an empty list if no posts are available
-        })
+    def get_queryset(self):
+        return BlogPost.objects.all()
     
-    return render(request, 'blog/posts.html', {
-        'url': 'blog',
-        'links': get_navigation_links('Posts'),
-        'posts': posts,  # Pass the posts data to template
-    })
-
-def posts_view(request, post_id):
-    try:
-        posts = BlogPost.objects.all().values('id', 'title', 'content')  # Fetch posts from the database
-        if not posts:
-            return posts_main_view(request)
-        
-        post_id = int(post_id)
-        post = next((post for post in posts if post['id'] == post_id), None)
-        if post is None:
-            return posts_main_view(request)
-
-        return render(request, 'blog/post_text_template.html', {
-            'url': 'blog',
-            'links': get_navigation_links('Posts'),
-            'article_title': post['title'],
-            'article_text': post['content'],
-            'article_date': 'January 2025',  # You can add dates to your posts data later
-            'article_author': 'Blog Author',  # You can add authors to your posts data later
-        })
-    except (ValueError, TypeError):
-        return posts_main_view(request)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['url'] = 'blog'
+        context['links'] = get_navigation_links('Posts')
+        return context
     
+
+class BlogPostDetailView(View):
+    def get(self, request, post_id):
+        try:
+            # Fetch the specific post with related author
+            post = BlogPost.objects.select_related('author').get(id=post_id)
+            
+            return render(request, 'blog/post_text_template.html', {
+                'url': 'blog',
+                'links': get_navigation_links('Posts'),
+                'article_title': post.title,
+                'article_text': post.content,
+                'article_date': post.created_at.strftime('%B %d, %Y'),
+                'article_author': post.author.full_name(),
+                'article_image': post.image.url if post.image else None,
+                'post': post,  # Pass the full post object for additional data if needed
+            })
+        except BlogPost.DoesNotExist: 
+            return BlogPostListView.as_view()(request)
+        except (ValueError, TypeError):
+            return BlogPostListView.as_view()(request)
+
+
 def add_post_view(request):
     form = NewPostForm()
     
