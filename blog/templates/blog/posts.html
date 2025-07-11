@@ -39,6 +39,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
 
         .logo {
@@ -65,6 +68,13 @@
         .nav-links a.active {
             border-bottom: 2px solid white;
             padding-bottom: 3px;
+        }
+
+        /* Admin Button */
+        .admin-btn:hover {
+            background: #c82333 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
         }
 
         /* Page Header */
@@ -477,7 +487,7 @@
 </head>
 <body>
     <header>
-        <nav class="container">
+        <nav>
             <div class="logo">
                 My Blog
                 {% if user.is_authenticated %}
@@ -486,11 +496,13 @@
                     </span>
                 {% endif %}
             </div>
-            <ul class="nav-links">
-                {% for link in links %}
-                    <li><a href="{{ link.url }}" class="{% if link.active %}active{% endif %}">{{ link.name }}</a></li>
-                {% endfor %}
-            </ul>
+            <div style="display: flex; align-items: center; gap: 2rem;">
+                <ul class="nav-links">
+                    {% for link in links %}
+                        <li><a href="{{ link.url }}" class="{% if link.active %}active{% endif %}">{{ link.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
         </nav>
     </header>
 
@@ -518,6 +530,11 @@
             {% endif %}
             {% if user.is_staff %}
                 <a href="/blog/add_author" style="margin-left: 15px; color: #17a2b8; text-decoration: none;">👤 Add Author</a>
+            {% endif %}
+            {% if user.is_superuser %}
+                <a href="/admin/" target="_blank" class="admin-btn" style="color: darkgray; padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: all 0.3s; border: 1px solid transparent;">
+                    🛠️ Database Admin
+                </a>
             {% endif %}
         </div>
     </div>

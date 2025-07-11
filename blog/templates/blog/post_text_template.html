@@ -219,6 +219,13 @@
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
         }
 
+        /* Like Button */
+        .like-button:hover {
+            background: #ff3742 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(255, 71, 87, 0.3);
+        }
+
         /* Footer */
         footer {
             background: #333;
@@ -305,12 +312,18 @@
         <!-- Admin Controls -->
         {% if user.is_authenticated %}
             <div style="margin-bottom: 1rem;">
-                <!-- Staff and Superuser Controls -->
+                <!-- Like Button -->
+                <form method="post" action="{% url 'blog:like_post' post.id %}" style="display: inline-block; margin-right: 10px;">
+                    {% csrf_token %}
+                    <button type="submit" class="like-button" style="background: #ff4757; color: white; padding: 0.5rem 1rem; border: none; border-radius: 5px; cursor: pointer; transition: all 0.3s;">
+                        ❤️ Like ({{ post.like_count }})
+                    </button>
+                </form>
 
+                <!-- Staff and Superuser Controls -->
                 {% if user|in_groups:"Authors,Admin" %}
                     <a href="{% url 'blog:edit_post' post.id %}" class="edit-button" style="display: inline-block; margin-right: 10px; background: #17a2b8; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 5px;">✏️ Edit Post (Editor)</a>
                 {% endif %}
-
 
                 {% if user.is_staff %}
                     {% if user.is_superuser %}

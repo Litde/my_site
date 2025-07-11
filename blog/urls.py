@@ -11,6 +11,7 @@ urlpatterns = [
     path('post/<int:post_id>/', blog_views.BlogPostDetailView.as_view(), name='post'),
     path('post/<int:post_id>/edit/', blog_views.edit_post_view, name='edit_post'),
     path('post/<int:post_id>/delete/', blog_views.delete_post_view, name='delete_post'),
+    path('post/<int:post_id>/like/', blog_views.like_post_view, name='like_post'),
     path('add_post/', blog_views.add_post_view, name='add_post'),
     path('add_author/', blog_views.add_author_view, name='add_author'),
     path('login/', blog_views.login_view, name='login'),

@@ -250,3 +250,11 @@ def logout_view(request):
         messages.success(request, 'You have been logged out successfully.')
     return redirect('blog:login')
 
+
+
+def like_post_view(request, post_id):
+    post = get_object_or_404(BlogPost, id=post_id)
+    post.like_count += 1
+    post.save()
+    messages.success(request, f'You liked the post "{post.title}"!')
+    return redirect('blog:post', post_id=post.id)
