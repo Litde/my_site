@@ -148,13 +148,13 @@ def edit_post_view(request, post_id):
         if form.is_valid():
             form.save()
             messages.success(request, f'Post "{post.title}" has been updated successfully!')
-            return redirect('blog:post_detail', post_id=post.id)
+            return redirect('blog:post', post_id=post.id)
         else:
             messages.error(request, 'Please correct the errors below.')
 
     return render(request, 'blog/add_post.html', {
         'url': 'blog',
-        'links': get_navigation_links('Edit Post', request.user),
+        'links': get_navigation_links('Posts', request.user),  # Changed from 'Edit Post' to 'Posts'
         'form': form,
     })
 

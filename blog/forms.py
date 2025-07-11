@@ -26,13 +26,24 @@ class NewPostForm(forms.ModelForm):
         self.fields['content'].required = True
         self.fields['author'].required = True
         
+        # Image is never required (especially when editing existing posts)
+        self.fields['image'].required = False
+        
         # Populate author choices
         self.fields['author'].queryset = Author.objects.all()
         
-        # If editing an existing post, populate tags field
+        # If editing an existing post, populate tags field and update image help text
         if self.instance.pk:
             tags = self.instance.tags.all()
             self.fields['tags'].initial = ', '.join([tag.name for tag in tags])
+            
+            # Update image field help text for editing
+            if self.instance.image:
+                self.fields['image'].help_text = "Current image will be kept if no new image is uploaded"
+            else:
+                self.fields['image'].help_text = "Upload an image for this post (optional)"
+        else:
+            self.fields['image'].help_text = "Upload an image for this post (optional)"
 
     def save(self, commit=True):
         instance = super().save(commit=False)

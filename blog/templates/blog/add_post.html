@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add New Post - My Blog</title>
+    <title>{% if form.instance.pk %}Edit Post{% else %}Add New Post{% endif %} - My Blog</title>
     <style>
         * {
             margin: 0;
@@ -227,6 +227,66 @@
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
+        /* Author Search */
+        .author-search-container {
+            position: relative;
+        }
+
+        .author-search {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+        }
+
+        .author-search:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .author-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #e1e5e9;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+
+        .author-option {
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .author-option:hover {
+            background: #f8f9fa;
+        }
+
+        .author-option.selected {
+            background: #667eea;
+            color: white;
+        }
+
+        .author-option:last-child {
+            border-bottom: none;
+        }
+
+        /* Hide original select when search is active */
+        .author-search-container.active select {
+            display: none;
+        }
+
         .tag-item {
             background: #667eea;
             color: white;
@@ -408,7 +468,7 @@
 
     <section class="page-header">
         <div class="container">
-            <h1>Create New Post</h1>
+            <h1>{% if form.instance.pk %}Edit Post{% else %}Create New Post{% endif %}</h1>
             <p>Share your thoughts and ideas with the world</p>
         </div>
     </section>
@@ -460,10 +520,15 @@
                     <!-- Author Field -->
                     <div class="form-group{% if form.author.errors %} has-error{% endif %}">
                         <label for="{{ form.author.id_for_label }}">{{ form.author.label }} *</label>
-                        {{ form.author }}
+                        <div class="author-search-container" id="authorSearchContainer">
+                            <input type="text" class="author-search" id="authorSearch" placeholder="Search for an author..." autocomplete="off">
+                            <div class="author-dropdown" id="authorDropdown"></div>
+                            {{ form.author }}
+                        </div>
                         {% if form.author.errors %}
                             <div class="error">{{ form.author.errors.0 }}</div>
                         {% endif %}
+                        <small style="color: #6c757d; font-size: 0.9rem;">Type to search for authors or scroll through the list</small>
                     </div>
 
                     <!-- Content Field -->
@@ -491,16 +556,34 @@
                     <!-- Image Upload -->
                     <div class="form-group{% if form.image.errors %} has-error{% endif %}">
                         <label for="{{ form.image.id_for_label }}">{{ form.image.label }}</label>
+                        
+                        {% if form.instance.image %}
+                            <!-- Show current image when editing -->
+                            <div class="current-image" style="margin-bottom: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; border: 2px solid #e9ecef;">
+                                <p style="margin: 0 0 0.5rem 0; font-weight: 600; color: #495057;">Current Image:</p>
+                                <img src="{{ form.instance.image.url }}" alt="Current post image" style="max-width: 200px; max-height: 150px; object-fit: cover; border-radius: 4px; border: 1px solid #dee2e6;">
+                                <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: #6c757d;">{{ form.instance.image.name }}</p>
+                            </div>
+                        {% endif %}
+                        
                         <div class="file-upload">
                             {{ form.image }}
                             <label for="{{ form.image.id_for_label }}" class="file-upload-label">
                                 <i>📷</i>
-                                <span>Click to upload an image or drag and drop</span>
-                                <small>Supported formats: JPG, PNG, GIF (Max 5MB)</small>
+                                {% if form.instance.image %}
+                                    <span>Click to upload a new image (optional)</span>
+                                    <small>Leave empty to keep current image • Supported formats: JPG, PNG, GIF (Max 5MB)</small>
+                                {% else %}
+                                    <span>Click to upload an image or drag and drop</span>
+                                    <small>Supported formats: JPG, PNG, GIF (Max 5MB)</small>
+                                {% endif %}
                             </label>
                         </div>
                         {% if form.image.errors %}
                             <div class="error">{{ form.image.errors.0 }}</div>
+                        {% endif %}
+                        {% if form.image.help_text %}
+                            <small style="color: #6c757d; font-size: 0.9rem; display: block; margin-top: 0.5rem;">{{ form.image.help_text }}</small>
                         {% endif %}
                     </div>
 
@@ -513,7 +596,7 @@
 
                     <!-- Form Actions -->
                     <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Publish Post</button>
+                        <button type="submit" class="btn btn-primary">{% if form.instance.pk %}Update Post{% else %}Publish Post{% endif %}</button>
                         <a href="{% url 'blog:posts' %}" class="btn btn-secondary">Cancel</a>
                     </div>
                 </form>
@@ -537,7 +620,136 @@
                 tags = tagNames;
                 updateTagsDisplay();
             }
+
+            // Initialize author search
+            initializeAuthorSearch();
         });
+
+        // Author search functionality
+        function initializeAuthorSearch() {
+            const authorSelect = document.getElementById('id_author');
+            const authorSearch = document.getElementById('authorSearch');
+            const authorDropdown = document.getElementById('authorDropdown');
+            const authorContainer = document.getElementById('authorSearchContainer');
+            
+            if (!authorSelect || !authorSearch || !authorDropdown) return;
+
+            // Extract all authors from the select options
+            const authors = Array.from(authorSelect.options).map(option => ({
+                value: option.value,
+                text: option.text,
+                selected: option.selected
+            })).filter(author => author.value); // Remove empty option
+
+            // Set initial value if an author is already selected
+            const selectedAuthor = authors.find(author => author.selected);
+            if (selectedAuthor) {
+                authorSearch.value = selectedAuthor.text;
+            }
+
+            // Show dropdown when search input is focused
+            authorSearch.addEventListener('focus', function() {
+                showAuthorDropdown(authors, '');
+                authorContainer.classList.add('active');
+            });
+
+            // Filter authors as user types
+            authorSearch.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const filteredAuthors = authors.filter(author => 
+                    author.text.toLowerCase().includes(searchTerm)
+                );
+                showAuthorDropdown(filteredAuthors, searchTerm);
+            });
+
+            // Hide dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!authorContainer.contains(e.target)) {
+                    hideAuthorDropdown();
+                    authorContainer.classList.remove('active');
+                }
+            });
+
+            // Keyboard navigation
+            authorSearch.addEventListener('keydown', function(e) {
+                const options = authorDropdown.querySelectorAll('.author-option');
+                const selected = authorDropdown.querySelector('.author-option.selected');
+                let newSelected = null;
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (selected && selected.nextElementSibling) {
+                        newSelected = selected.nextElementSibling;
+                    } else if (options.length > 0) {
+                        newSelected = options[0];
+                    }
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (selected && selected.previousElementSibling) {
+                        newSelected = selected.previousElementSibling;
+                    } else if (options.length > 0) {
+                        newSelected = options[options.length - 1];
+                    }
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (selected) {
+                        selectAuthor(selected.dataset.value, selected.textContent);
+                    }
+                } else if (e.key === 'Escape') {
+                    hideAuthorDropdown();
+                    authorContainer.classList.remove('active');
+                }
+
+                if (newSelected) {
+                    options.forEach(opt => opt.classList.remove('selected'));
+                    newSelected.classList.add('selected');
+                    newSelected.scrollIntoView({ block: 'nearest' });
+                }
+            });
+
+            function showAuthorDropdown(authorsToShow, searchTerm) {
+                authorDropdown.innerHTML = '';
+                
+                if (authorsToShow.length === 0) {
+                    authorDropdown.innerHTML = '<div class="author-option">No authors found</div>';
+                } else {
+                    authorsToShow.forEach((author, index) => {
+                        const option = document.createElement('div');
+                        option.className = 'author-option';
+                        option.dataset.value = author.value;
+                        option.textContent = author.text;
+                        
+                        // Highlight search term
+                        if (searchTerm) {
+                            const regex = new RegExp(`(${searchTerm})`, 'gi');
+                            option.innerHTML = author.text.replace(regex, '<strong>$1</strong>');
+                        }
+                        
+                        option.addEventListener('click', function() {
+                            selectAuthor(author.value, author.text);
+                        });
+                        
+                        authorDropdown.appendChild(option);
+                    });
+                }
+                
+                authorDropdown.style.display = 'block';
+            }
+
+            function hideAuthorDropdown() {
+                authorDropdown.style.display = 'none';
+            }
+
+            function selectAuthor(value, text) {
+                authorSearch.value = text;
+                authorSelect.value = value;
+                hideAuthorDropdown();
+                authorContainer.classList.remove('active');
+                
+                // Trigger change event for form validation
+                authorSelect.dispatchEvent(new Event('change'));
+            }
+        }
 
         // Character counters
         function updateCharCount(inputId, countId, maxLength) {
